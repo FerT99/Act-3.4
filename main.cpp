@@ -5,64 +5,60 @@
 // Date: 28/11/2022
 //
 // =================================================================
-#include <iostream>
-#include <string>
-#include <fstream>
-#include <map>
 
-#include "codigoHash.h"
+#include <iostream>
+#include <fstream>
+#include <vector>
+#include <string>
+#include <sstream>
+#include "header.h"
+#include "heapFile.h"
 
 using namespace std;
 
-unsigned int myHash1(const string s) {
-	return (unsigned int) s[0];
-}
-
 int main(int argc, char* argv[]) {
-	int lines, jobs;
-	ifstream input (argv[1], ios::in);
-	fstream output (argv[2], ios::out);
-
-	if (argc != 3) {
-		output << "Usage: " << " <input file> <output file>" << endl;
-		return -1;
-	}else if (!input) {
-		output << "Error opening file " << argv[1] << endl;
-		return -1;
-	}else if (!output) {
-		output << "Error opening file " << argv[2] << endl;
-		return -1;
-	}
-
-	input >> lines;
-	input >> jobs;
-
 	
+	
+	ifstream inputFile;
+	ofstream outputFile;
 
-	HashTable<string, int> hash(lines, string("empty"), myHash1);
-
-	for (int i = 0; i < lines; i++){
-		string job;
-		int time;
-		input >> job >> time;
-		hash.put(job, time);
+	inputFile.open(argv[1]);
+	if (inputFile.fail()){
+		cout << "Error: cannot open file" << endl;
+		return 1;
 	}
 
-	for (int i = 0; i < jobs; i++){
-		string job;
-		int weight = 0;
-		
-		while (input >> job){
-			if (job == "."){
-				break;
-			}
-			weight += hash.get(job);
+	outputFile.open(argv[2]);
+	if (outputFile.fail()){
+		cout << "Error: cannot open file" << endl;
+		return 1;
+	}
+
+	int n;
+	
+	inputFile >> n;
+	
+	Heap<int> Heap(n);
+		for (int i = 0; i < n; i++){
+			int number;
+			inputFile >> number;
+			Heap.add(number);
 		}
-		output << weight << endl;
+
+	for(int i = 0; i < n; i++){
+		Heap.pushDown(i);
 	}
 
-	input.close();
-	output.close();
+	int sum = 0, m = 0;
 
+	for(int i = 0; i < n && Heap.length() > 1; i++){
+		sum = Heap.remove() + Heap.remove();
+		Heap.toString();
+		Heap.add(sum);
+		m += sum - 1;
+	}
+	
+	outputFile << m << endl;
+	
 	return 0;
 }
